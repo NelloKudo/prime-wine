@@ -1,5 +1,5 @@
 <h1 align="center"> prime-wine </h1>
-<p align="center"> Alternative approach to enable Prime Video HD playback support on Linux, using Wine and Brave 📽️ </p>
+<p align="center"> Alternative approach to enable Prime Video HD playback on Linux, using Wine and Brave 📽️ </p>
 
 <div align="center">
 
@@ -21,7 +21,7 @@ You can set up Brave + Prime Video (with Wine) in two ways:
 ### Option 1: Lutris (Automated)
 Use the provided Lutris script in this repo to install everything in one go:
 - Install [Lutris](https://lutris.net/downloads/).
-- Download the `.yml` script from [here]().
+- Download the `.yml` script from [here](https://github.com/NelloKudo/prime-wine/blob/main/prime-wine-lutris.yaml).
 - Import it into Lutris (`Lutris → "+" → Import Game → YAML`).
 - Run the installer, it will handle Wine, dependencies and the whole setup for you.
 - Open Prime, accept the Widevine DRM notification after you login and enjoy HD!
