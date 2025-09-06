@@ -1,0 +1,39 @@
+description: Prime Video (Brave Browser)
+game_slug: prime-video-wine
+gogslug: ''
+humblestoreid: ''
+installer_slug: prime-video-wine
+name: Prime Video
+notes: "- Dependencies are: dxvk, vkd3d, vcrun2022, corefonts, win10"
+runner: wine
+script:
+  files:
+  - bravesetup:
+      filename: BraveBrowserStandaloneSetup.exe
+      url: https://github.com/brave/brave-browser/releases/download/v1.82.161/BraveBrowserStandaloneSetup.exe
+  game:
+    exe: drive_c/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe
+    prefix: $GAMEDIR
+    args: --app=https://www.primevideo.com
+  installer:
+  - task:
+      arch: win64
+      name: create_prefix
+      prefix: $GAMEDIR
+  - task:
+      app: dxvk vkd3d vcrun2022 corefonts win10
+      description: Installing components (dxvk, vkd3d, vcrun2022, corefonts)..
+      name: winetricks
+      prefix: $GAMEDIR
+  - task:
+      description: "Installing Brave Browser.."
+      executable: bravesetup
+      name: wineexec
+      include_processes: BraveBrowserStandaloneSetup.exe
+      exclude_processes: BraveUpdate.exe
+  wine:
+    version: wine-10.8-staging-tkg-ntsync
+slug: brave-brave
+steamid: null
+version: v1.82.161
+year: 2025
