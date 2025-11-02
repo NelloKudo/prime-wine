@@ -31,8 +31,6 @@ script:
       name: wineexec
       include_processes: BraveBrowserStandaloneSetup.exe
       exclude_processes: BraveUpdate.exe
-  wine:
-    version: wine-10.8-staging-tkg-ntsync
 slug: brave-brave
 steamid: null
 version: v1.82.161
