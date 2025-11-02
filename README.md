@@ -19,7 +19,19 @@ You can set up Brave + Prime Video (with Wine) in two ways:
 </div>
 
 ### Option 1: Lutris (Automated)
-Use the provided Lutris script in this repo to install everything in one go:
+First install Wine-TkG 10.8 in Lutris with the following command:
+- If using Lutris from repositories:
+```
+mkdir -p ~/.local/share/lutris/runners/wine
+curl -L https://github.com/Kron4ek/Wine-Builds/releases/download/10.8/wine-10.8-staging-tkg-ntsync-amd64-wow64.tar.xz | tar -xJ -C ~/.local/share/lutris/runners/wine && mv ~/.local/share/lutris/runners/wine/wine-10.8-staging-tkg-ntsync-amd64-wow64 ~/.local/share/lutris/runners/wine/wine-10.8-staging-tkg-ntsync-x86_64
+```
+- If using Lutris from Flatpak: 
+```
+mkdir -p ~/.var/app/net.lutris.Lutris/data/lutris/runners/wine
+curl -L https://github.com/Kron4ek/Wine-Builds/releases/download/10.8/wine-10.8-staging-tkg-ntsync-amd64-wow64.tar.xz | tar -xJ -C ~/.var/app/net.lutris.Lutris/data/lutris/runners/wine && mv ~/.var/app/net.lutris.Lutris/data/lutris/runners/wine/wine-10.8-staging-tkg-ntsync-amd64-wow64 ~/.var/app/net.lutris.Lutris/data/lutris/runners/wine/wine-10.8-staging-tkg-ntsync-x86_64
+```
+
+Then use the provided Lutris script in this repo to install everything in one go:
 - Install [Lutris](https://lutris.net/downloads/).
 - Download the `.yml` script from [here](https://github.com/NelloKudo/prime-wine/blob/main/prime-wine-lutris.yaml).
 - Import it into Lutris (`Lutris → "+" → Import Game → YAML`).
