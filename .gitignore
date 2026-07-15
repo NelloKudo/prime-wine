@@ -1,0 +1,5 @@
+/target
+/AppDir
+/appimagetool
+*.AppImage
+/build-cache

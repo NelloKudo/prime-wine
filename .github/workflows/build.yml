@@ -1,0 +1,53 @@
+# builds the appimage on every push and attaches it to releases on tags
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  appimage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: check formatting
+        run: cargo fmt --check
+
+      - name: clippy
+        run: cargo clippy -- -D warnings
+
+      - name: build appimage
+        env:
+          # no fuse on ci runners, let appimagetool self extract
+          APPIMAGE_EXTRACT_AND_RUN: 1
+        run: ./build-appimage.sh
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: PrimeWine-x86_64.AppImage
+          path: PrimeWine-x86_64.AppImage
+
+      - name: attach to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v3
+        with:
+          files: PrimeWine-x86_64.AppImage
+          generate_release_notes: true

@@ -1,0 +1,10 @@
+[package]
+name = "prime-wine"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+eframe = "0.35.0"
+egui_extras = { version = "0.35", features = ["image"] }
+serde_json = "1.0.150"
+ureq = { version = "2", features = ["json"] }
