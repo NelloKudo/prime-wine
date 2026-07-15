@@ -7,54 +7,36 @@
 
 ---
 
-  &ensp;<a href="#installation-%EF%B8%8F"><kbd> <br> Installation <br> </kbd></a>&ensp;
-  &ensp;<a href="#overview"><kbd> <br> Overview <br> </kbd></a>&ensp;
+  &ensp;<a href="#installation-%EF%B8%8F"><kbd> <br> Installation <br> </kbd></a>&ensp;
+  &ensp;<a href="#overview"><kbd> <br> Overview <br> </kbd></a>&ensp;
+  &ensp;<a href="#building-from-source"><kbd> <br> Building <br> </kbd></a>&ensp;
 
 ---
 
 ## Installation
 
-You can set up Brave + Prime Video (with Wine) in two ways:
-
 </div>
 
-### Option 1: Lutris (Automated)
-First install Wine-TkG 10.8 in Lutris with the following command:
-- If using Lutris from repositories:
+Grab `PrimeWine-x86_64.AppImage` from the [latest release](https://github.com/NelloKudo/prime-wine/releases/latest), then:
+
 ```
-mkdir -p ~/.local/share/lutris/runners/wine
-curl -L https://github.com/Kron4ek/Wine-Builds/releases/download/10.8/wine-10.8-staging-tkg-ntsync-amd64-wow64.tar.xz | tar -xJ -C ~/.local/share/lutris/runners/wine && mv ~/.local/share/lutris/runners/wine/wine-10.8-staging-tkg-ntsync-amd64-wow64 ~/.local/share/lutris/runners/wine/wine-10.8-staging-tkg-ntsync-x86_64
-```
-- If using Lutris from Flatpak: 
-```
-mkdir -p ~/.var/app/net.lutris.Lutris/data/lutris/runners/wine
-curl -L https://github.com/Kron4ek/Wine-Builds/releases/download/10.8/wine-10.8-staging-tkg-ntsync-amd64-wow64.tar.xz | tar -xJ -C ~/.var/app/net.lutris.Lutris/data/lutris/runners/wine && mv ~/.var/app/net.lutris.Lutris/data/lutris/runners/wine/wine-10.8-staging-tkg-ntsync-amd64-wow64 ~/.var/app/net.lutris.Lutris/data/lutris/runners/wine/wine-10.8-staging-tkg-ntsync-x86_64
+chmod +x PrimeWine-x86_64.AppImage
+./PrimeWine-x86_64.AppImage
 ```
 
-Then use the provided Lutris script in this repo to install everything in one go:
-- Install [Lutris](https://lutris.net/downloads/).
-- Download the `.yml` script from [here](https://github.com/NelloKudo/prime-wine/blob/main/prime-wine-lutris.yaml).
-- Import it into Lutris (`Lutris → "+" → Import Game → YAML`).
-- Run the installer, it will handle Wine, dependencies and the whole setup for you.
-- Open Prime, accept the Widevine DRM notification after you login and enjoy HD!
+Press `install` and let it do its thing: it downloads Wine and Brave, sets up the prefix with everything needed and adds a **Prime Video** entry to your app menu. After logging in to Prime, accept the Widevine DRM notification you get in the website and enjoy HD!
 
-### Option 2: Manual
-Assuming you have both `wine-staging` and `winetricks` installed and you're on a fairly recent Wine version:
-- Create a prefix with all the needed components: `WINEPREFIX=~/prime winetricks -q dxvk vkd3d corefonts vcrun2022 win10`
-- Download Brave's standalone Windows installer from their GitHub, here's [v1.82.161](https://github.com/brave/brave-browser/releases/tag/v1.82.161)
-- Install it with Wine: `WINEPREFIX=~/prime wine ~/Downloads/BraveBrowserStandaloneSetup.exe`
-- Run Prime Video from Brave as an app (important) with the following:
-```
-WINEPREFIX=~/prime wine ~/prime/drive_c/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe --app=https://www.primevideo.com
-```
-- After logging in to Prime, accept the Widevine DRM notification you get in the website.
+From then on:
+- Clicking the menu entry (or the AppImage) goes straight to Prime Video.
+- Search for **Manage Prime Video settings** in the menu (or run the AppImage with `--manage`) to update Brave, kill Wine, reinstall or uninstall.
+- Brave cannot update itself under Wine, so use the `update brave` button every now and then.
 
-You can then just create a launch script for it or add it to Bottles or whatever launcher you prefer.
+The only things needed on your system are `bash`, `tar` and `xz`, which every distro ships anyway (`cabextract` comes bundled in the AppImage).
 
 ---
 
 <div align="center">
-  
+
 ## Overview
 
 You're probably familiar with the following issue you get while using Prime Video on native Linux browsers:
@@ -86,6 +68,20 @@ Some more interesting points:
 **Can this be done in services other than Prime Video?**
 - Haven't personally tested here, but it probably can be done. After all Prime was, in my experience, the most painful one to get to work.
 - You can switch to other websites by changing the arguments of the Brave executable to: `--app=https://www.yourwebsite.com`
+
+---
+
+## Building from source
+
+Everything is just plain Rust plus a bash script for packaging:
+
+```
+git clone https://github.com/NelloKudo/prime-wine.git
+cd prime-wine
+./build-appimage.sh
+```
+
+The script builds the release binary, compiles a static `cabextract`, and packs everything into `PrimeWine-x86_64.AppImage`.
 
 ---
 
