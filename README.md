@@ -3,7 +3,7 @@
 
 <div align="center">
 
-<img width="3824" height="1080" alt="merged_side_by_side_updated" src="https://github.com/user-attachments/assets/7c5bbf9b-fe41-4db5-b70f-2d1d027b8488" />
+<img width="3840" height="1080" alt="image" src="https://github.com/user-attachments/assets/e450a593-48cb-4a50-9087-376767a11c51" />
 
 ---
 
@@ -24,7 +24,7 @@ chmod +x PrimeWine-x86_64.AppImage
 ./PrimeWine-x86_64.AppImage
 ```
 
-Press `install` and let it do its thing: it downloads Wine and Brave, sets up the prefix with everything needed and adds a **Prime Video** entry to your app menu. After logging in to Prime, accept the Widevine DRM notification you get in the website and enjoy HD!
+Press `install` and let it do its thing: it downloads Wine and Brave, sets up the prefix with everything needed and adds a **Prime Video** entry to your app menu. After logging in to Prime, accept the Widevine DRM notification you get in the website, wait for the site to reboot, then relaunch Prime Video. Enjoy HD!
 
 From then on:
 - Clicking the menu entry (or the AppImage) goes straight to Prime Video.
@@ -40,8 +40,6 @@ The only things needed on your system are `bash`, `tar` and `xz`, which every di
 ## Overview
 
 You're probably familiar with the following issue you get while using Prime Video on native Linux browsers:
-
-<img width="671" height="222" alt="image" src="https://github.com/user-attachments/assets/e1e6fe09-31c1-43a7-9b37-3c20d5c29035" />
 
 ---
 
