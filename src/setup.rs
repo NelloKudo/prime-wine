@@ -1,15 +1,14 @@
 use crate::download;
-use crate::messages::WorkerMsg;
+use crate::gui::WorkerMsg;
 use crate::paths;
 use std::io::BufRead;
 use std::os::unix::fs::PermissionsExt;
 use std::process::{Command, Stdio};
 use std::sync::mpsc::Sender;
 
-const WINE_URL: &str = "https://github.com/Kron4ek/Wine-Builds/releases/download/11.13/wine-11.13-staging-amd64-wow64.tar.xz";
 const WINETRICKS_URL: &str =
     "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks";
-const WINETRICKS_PACKAGES: &str = "dxvk vkd3d corefonts vcrun2022 win10";
+const WINETRICKS_PACKAGES: [&str; 5] = ["dxvk", "vkd3d", "corefonts", "vcrun2022", "win10"];
 
 fn log(tx: &Sender<WorkerMsg>, text: &str) {
     let _ = tx.send(WorkerMsg::Log(text.to_string()));
@@ -25,7 +24,6 @@ fn full_path_var() -> String {
     path
 }
 
-// adds the wine environment to a command
 pub fn add_wine_env(cmd: &mut Command) {
     cmd.env("WINEPREFIX", paths::prefix_dir());
     cmd.env("WINE", paths::wine_bin());
@@ -34,7 +32,6 @@ pub fn add_wine_env(cmd: &mut Command) {
     cmd.env("WINEDLLOVERRIDES", "winemenubuilder.exe=d");
 }
 
-// runs a command and sends its output lines to the gui
 pub fn run_logged_command(mut cmd: Command, tx: &Sender<WorkerMsg>) -> Result<(), String> {
     cmd.stdout(Stdio::piped());
     cmd.stderr(Stdio::piped());
@@ -77,8 +74,15 @@ fn download_and_extract_wine(tx: &Sender<WorkerMsg>) -> Result<(), String> {
     }
 
     let archive = paths::data_dir().join("wine.tar.xz");
-    log(tx, "downloading wine 11.13 staging...");
-    download::download_file(WINE_URL, &archive, tx)?;
+    let url = format!(
+        "https://github.com/Kron4ek/Wine-Builds/releases/download/{v}/wine-{v}-staging-amd64-wow64.tar.xz",
+        v = paths::WINE_VERSION
+    );
+    log(
+        tx,
+        &format!("downloading wine {} staging...", paths::WINE_VERSION),
+    );
+    download::download_file(&url, &archive, tx)?;
 
     log(tx, "extracting wine...");
     let mut cmd = Command::new("tar");
@@ -100,7 +104,6 @@ fn download_winetricks(tx: &Sender<WorkerMsg>) -> Result<(), String> {
     log(tx, "downloading winetricks...");
     download::download_file(WINETRICKS_URL, &paths::winetricks_bin(), tx)?;
 
-    // make it executable
     let perms = std::fs::Permissions::from_mode(0o755);
     std::fs::set_permissions(paths::winetricks_bin(), perms)
         .map_err(|e| format!("could not chmod winetricks: {}", e))?;
@@ -113,27 +116,22 @@ fn setup_prefix(tx: &Sender<WorkerMsg>) -> Result<(), String> {
     cmd.arg(paths::winetricks_bin());
     cmd.arg("-q");
     cmd.arg("-f");
-    for package in WINETRICKS_PACKAGES.split(' ') {
-        cmd.arg(package);
-    }
+    cmd.args(WINETRICKS_PACKAGES);
     add_wine_env(&mut cmd);
     run_logged_command(cmd, tx)?;
     Ok(())
 }
 
-fn check_host_tools(tx: &Sender<WorkerMsg>) -> Result<(), String> {
+fn check_host_tools() -> Result<(), String> {
     // winetricks needs these, cabextract comes bundled in the appimage
+    let path = full_path_var();
     for tool in ["bash", "tar", "xz", "cabextract"] {
-        let found = Command::new("which")
-            .arg(tool)
-            .env("PATH", full_path_var())
-            .output()
-            .map(|o| o.status.success())
-            .unwrap_or(false);
+        let found = path
+            .split(':')
+            .any(|dir| std::path::Path::new(dir).join(tool).exists());
         if !found {
             return Err(format!("please install '{}' from your distro first", tool));
         }
-        log(tx, &format!("found {}", tool));
     }
     Ok(())
 }
@@ -143,7 +141,7 @@ pub fn run_install(tx: &Sender<WorkerMsg>) -> Result<(), String> {
     std::fs::create_dir_all(paths::data_dir())
         .map_err(|e| format!("could not create data folder: {}", e))?;
 
-    check_host_tools(tx)?;
+    check_host_tools()?;
     download_and_extract_wine(tx)?;
     download_winetricks(tx)?;
     setup_prefix(tx)?;

@@ -1,5 +1,4 @@
 // really bad attempt at kinda replicating gtk looks
-// gtk adwaita dark look, gray surfaces and flat gray buttons
 use eframe::egui;
 
 // the accent blue gtk uses for suggested actions
@@ -114,6 +113,5 @@ fn build_visuals() -> egui::Visuals {
         BUTTON_PRESSED,
         egui::Color32::WHITE,
     );
-    paint_state(&mut visuals.widgets.open, BUTTON_PRESSED, TEXT);
     visuals
 }

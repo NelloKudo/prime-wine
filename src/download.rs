@@ -1,8 +1,7 @@
-use crate::messages::WorkerMsg;
+use crate::gui::WorkerMsg;
 use std::io::{Read, Write};
 use std::sync::mpsc::Sender;
 
-// downloads a url into a file and reports progress to the gui
 pub fn download_file(
     url: &str,
     dest: &std::path::Path,

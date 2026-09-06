@@ -1,4 +1,5 @@
 use crate::paths;
+use crate::setup;
 use std::process::Command;
 
 const BRAVE_ARGS: [&str; 2] = [
@@ -18,16 +19,14 @@ fn brave_command() -> Result<Command, String> {
     let mut cmd = Command::new(paths::wine_bin());
     cmd.arg(paths::brave_exe());
     cmd.args(BRAVE_ARGS);
-    cmd.env("WINEPREFIX", paths::prefix_dir());
+    setup::add_wine_env(&mut cmd);
     cmd.env("WINEDEBUG", "-all");
-    // no start menu or desktop entries from wine
-    cmd.env("WINEDLLOVERRIDES", "winemenubuilder.exe=d");
     cmd.stdout(log_file);
     cmd.stderr(log_file_err);
     Ok(cmd)
 }
 
-// used when the desktop icon is clicked, stays alive while brave runs
+// used when the menu entry is clicked, stays alive while brave runs
 pub fn launch_prime_and_wait() -> Result<(), String> {
     let started = std::time::Instant::now();
     let status = brave_command()?
@@ -52,7 +51,6 @@ pub fn launch_prime_detached() -> Result<(), String> {
     Ok(())
 }
 
-// stops everything running in our prefix
 pub fn kill_wine() -> Result<(), String> {
     let status = Command::new(paths::wineserver_bin())
         .arg("-k")

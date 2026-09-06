@@ -1,8 +1,14 @@
-// really bad attempt at kinda replicating gtk looks
-use crate::messages::WorkerMsg;
 use crate::{brave, desktop, launcher, paths, setup, theme};
 use eframe::egui;
 use std::sync::mpsc::{Receiver, Sender};
+
+// messages the worker thread sends to the gui
+pub enum WorkerMsg {
+    Log(String),
+    Progress(f32),
+    Done,
+    Failed(String),
+}
 
 pub fn run_gui(startup_error: Option<String>) {
     let options = eframe::NativeOptions {
@@ -23,7 +29,6 @@ pub fn run_gui(startup_error: Option<String>) {
     }
 }
 
-// blue button, like a gtk suggested action
 fn big_button(ui: &mut egui::Ui, label: &str, width: f32) -> bool {
     let text = egui::RichText::new(label)
         .size(15.0)
@@ -195,7 +200,6 @@ impl eframe::App for App {
                 .request_repaint_after(std::time::Duration::from_millis(100));
         }
 
-        // icon in the top right corner
         let icon_size = 48.0;
         let icon_rect = egui::Rect::from_min_size(
             egui::pos2(

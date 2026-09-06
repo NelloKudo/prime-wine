@@ -1,5 +1,5 @@
 use crate::download;
-use crate::messages::WorkerMsg;
+use crate::gui::WorkerMsg;
 use crate::paths;
 use crate::setup;
 use std::process::Command;
@@ -18,7 +18,6 @@ fn installer_path() -> std::path::PathBuf {
     paths::data_dir().join(BRAVE_INSTALLER_NAME)
 }
 
-// runs the installer and waits until brave.exe shows up
 fn run_installer(tx: &Sender<WorkerMsg>) -> Result<(), String> {
     log(tx, "running the brave installer...");
     let mut cmd = Command::new(paths::wine_bin());
@@ -31,7 +30,6 @@ fn run_installer(tx: &Sender<WorkerMsg>) -> Result<(), String> {
         .spawn()
         .map_err(|e| format!("could not start the installer: {}", e))?;
 
-    // the setup exe only exits once the install is really over
     log(tx, "waiting for the installer to finish...");
     let _ = child.wait();
 
@@ -62,7 +60,6 @@ pub fn install_brave(tx: &Sender<WorkerMsg>) -> Result<(), String> {
     run_installer(tx)
 }
 
-// get latest stable release
 fn latest_installer_url() -> Result<String, String> {
     let response = ureq::get(BRAVE_RELEASES_API)
         .set("User-Agent", "prime-wine")
