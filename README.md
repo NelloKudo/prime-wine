@@ -30,6 +30,7 @@ From then on:
 - Clicking the menu entry (or the AppImage) goes straight to Prime Video.
 - Search for **Manage Prime Video settings** in the menu (or run the AppImage with `--manage`) to update Brave, kill Wine, reinstall or uninstall.
 - Brave cannot update itself under Wine, so use the `update brave` button every now and then.
+- Keep the AppImage where it was when you installed: the menu entries point at that exact path.
 
 The only things needed on your system are `bash`, `tar` and `xz`, which every distro ships anyway (`cabextract` comes bundled in the AppImage).
 
@@ -40,6 +41,8 @@ The only things needed on your system are `bash`, `tar` and `xz`, which every di
 ## Overview
 
 You're probably familiar with the following issue you get while using Prime Video on native Linux browsers:
+
+<img width="671" height="222" alt="image" src="https://github.com/user-attachments/assets/e1e6fe09-31c1-43a7-9b37-3c20d5c29035" />
 
 ---
 
