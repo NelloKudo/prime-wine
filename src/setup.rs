@@ -24,8 +24,8 @@ pub fn add_wine_env(cmd: &mut Command) {
     cmd.env("WINEPREFIX", paths::prefix_dir());
     cmd.env("WINE", paths::wine_bin());
     cmd.env("PATH", full_path_var());
-    // no start menu or desktop entries from wine
-    cmd.env("WINEDLLOVERRIDES", "winemenubuilder.exe=d");
+    // https://github.com/NelloKudo/prime-wine/issues/7
+    cmd.env("WINEDLLOVERRIDES", "wofutil=d;winemenubuilder.exe=d");
 }
 
 fn run_logged_command(mut cmd: Command, tx: &Sender<WorkerMsg>) -> Result<(), String> {
