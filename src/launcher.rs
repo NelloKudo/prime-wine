@@ -9,7 +9,7 @@ const BRAVE_ARGS: [&str; 2] = [
     "--disable-features=HardwareMediaKeyHandling",
 ];
 
-fn brave_command() -> Result<Command, String> {
+pub fn launch_prime() -> Result<(), String> {
     let log_file = std::fs::File::create(paths::brave_log_file())
         .map_err(|e| format!("could not create log file: {}", e))?;
     let log_file_err = log_file
@@ -23,13 +23,9 @@ fn brave_command() -> Result<Command, String> {
     cmd.env("WINEDEBUG", "-all");
     cmd.stdout(log_file);
     cmd.stderr(log_file_err);
-    Ok(cmd)
-}
 
-// used when the menu entry is clicked, stays alive while brave runs
-pub fn launch_prime_and_wait() -> Result<(), String> {
     let started = std::time::Instant::now();
-    let status = brave_command()?
+    let status = cmd
         .status()
         .map_err(|e| format!("could not start wine: {}", e))?;
 
@@ -43,18 +39,11 @@ pub fn launch_prime_and_wait() -> Result<(), String> {
     Ok(())
 }
 
-// used by the play button in the gui
-pub fn launch_prime_detached() -> Result<(), String> {
-    brave_command()?
-        .spawn()
-        .map_err(|e| format!("could not start wine: {}", e))?;
-    Ok(())
-}
-
 pub fn kill_wine() -> Result<(), String> {
-    let status = Command::new(paths::wineserver_bin())
-        .arg("-k")
-        .env("WINEPREFIX", paths::prefix_dir())
+    let mut cmd = Command::new(paths::wineserver_bin());
+    cmd.arg("-k");
+    setup::add_wine_env(&mut cmd);
+    let status = cmd
         .status()
         .map_err(|e| format!("could not run wineserver: {}", e))?;
     if !status.success() {

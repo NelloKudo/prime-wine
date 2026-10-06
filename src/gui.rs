@@ -1,8 +1,9 @@
 use crate::{brave, desktop, launcher, paths, setup, theme};
+use std::cell::Cell;
+use std::rc::Rc;
 use eframe::egui;
 use std::sync::mpsc::{Receiver, Sender};
 
-// messages the worker thread sends to the gui
 pub enum WorkerMsg {
     Log(String),
     Progress(f32),
@@ -10,37 +11,44 @@ pub enum WorkerMsg {
     Failed(String),
 }
 
-pub fn run_gui(startup_error: Option<String>) {
+pub fn log(tx: &Sender<WorkerMsg>, text: &str) {
+    let _ = tx.send(WorkerMsg::Log(text.to_string()));
+}
+
+// returns true if the user clicked play
+pub fn run_gui(startup_error: Option<String>) -> bool {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default().with_inner_size([640.0, 500.0]),
         ..Default::default()
     };
+    let play = Rc::new(Cell::new(false));
+    let app_play = play.clone();
     let result = eframe::run_native(
         "prime-wine",
         options,
         Box::new(|cc| {
             egui_extras::install_image_loaders(&cc.egui_ctx);
             theme::apply(&cc.egui_ctx);
-            Ok(Box::new(App::new(startup_error)))
+            Ok(Box::new(App::new(startup_error, app_play)))
         }),
     );
     if let Err(e) = result {
         eprintln!("could not open the window: {}", e);
     }
+    play.get()
 }
 
-fn big_button(ui: &mut egui::Ui, label: &str, width: f32) -> bool {
+fn accent_button(ui: &mut egui::Ui, label: &str) -> bool {
     let text = egui::RichText::new(label)
         .size(15.0)
         .family(theme::semibold())
         .color(egui::Color32::WHITE);
     let button = egui::Button::new(text).fill(theme::ACCENT);
-    ui.add_sized([width, 44.0], button).clicked()
+    ui.add_sized([200.0, 44.0], button).clicked()
 }
 
 const SMALL_BUTTON_WIDTH: f32 = 110.0;
 
-// gray button with a fixed size so rows are easy to center
 fn small_button(ui: &mut egui::Ui, label: &str) -> bool {
     ui.add_sized(
         [SMALL_BUTTON_WIDTH, 34.0],
@@ -49,7 +57,6 @@ fn small_button(ui: &mut egui::Ui, label: &str) -> bool {
     .clicked()
 }
 
-// centered section header with lines on both sides
 fn section_header(ui: &mut egui::Ui, label: &str) {
     let font = egui::FontId::new(12.5, theme::semibold());
     let galley = ui
@@ -76,10 +83,11 @@ struct App {
     error: Option<String>,
     confirm_uninstall: bool,
     worker_rx: Option<Receiver<WorkerMsg>>,
+    play: Rc<Cell<bool>>,
 }
 
 impl App {
-    fn new(startup_error: Option<String>) -> Self {
+    fn new(startup_error: Option<String>, play: Rc<Cell<bool>>) -> Self {
         Self {
             busy: false,
             progress: 0.0,
@@ -87,10 +95,10 @@ impl App {
             error: startup_error,
             confirm_uninstall: false,
             worker_rx: None,
+            play,
         }
     }
 
-    // runs a job on a thread so the window does not freeze
     fn start_worker(&mut self, job: fn(&Sender<WorkerMsg>) -> Result<(), String>) {
         let (tx, rx) = std::sync::mpsc::channel();
         self.worker_rx = Some(rx);
@@ -98,15 +106,11 @@ impl App {
         self.progress = 0.0;
         self.error = None;
         std::thread::spawn(move || {
-            let result = job(&tx);
-            match result {
-                Ok(()) => {
-                    let _ = tx.send(WorkerMsg::Done);
-                }
-                Err(e) => {
-                    let _ = tx.send(WorkerMsg::Failed(e));
-                }
-            }
+            let msg = match job(&tx) {
+                Ok(()) => WorkerMsg::Done,
+                Err(e) => WorkerMsg::Failed(e),
+            };
+            let _ = tx.send(msg);
         });
     }
 
@@ -118,15 +122,12 @@ impl App {
             match msg {
                 WorkerMsg::Log(line) => self.log_lines.push(line),
                 WorkerMsg::Progress(value) => self.progress = value,
-                WorkerMsg::Done => {
+                WorkerMsg::Done | WorkerMsg::Failed(_) => {
+                    if let WorkerMsg::Failed(e) = msg {
+                        self.error = Some(e);
+                    }
                     self.busy = false;
                     self.worker_rx = None;
-                    return;
-                }
-                WorkerMsg::Failed(e) => {
-                    self.busy = false;
-                    self.worker_rx = None;
-                    self.error = Some(e);
                     return;
                 }
             }
@@ -143,12 +144,9 @@ impl App {
     fn draw_buttons(&mut self, ui: &mut egui::Ui) {
         if paths::is_installed() {
             ui.vertical_centered(|ui| {
-                if big_button(ui, "watch prime video", 200.0) {
-                    if let Err(e) = launcher::launch_prime_detached() {
-                        self.error = Some(e);
-                    } else {
-                        ui.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
-                    }
+                if accent_button(ui, "watch prime video") {
+                    self.play.set(true);
+                    ui.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
                 }
             });
 
@@ -167,6 +165,8 @@ impl App {
                     }
                 }
                 if small_button(ui, "reinstall") {
+                    // fails when nothing is running, which is fine
+                    let _ = launcher::kill_wine();
                     // wipe the prefix but keep the wine download
                     let _ = std::fs::remove_dir_all(paths::prefix_dir());
                     self.start_worker(setup::run_install);
@@ -183,7 +183,7 @@ impl App {
             ui.vertical_centered(|ui| {
                 ui.label("this will download wine and brave, then set everything up for you.");
                 ui.add_space(4.0);
-                if big_button(ui, "install", 200.0) {
+                if accent_button(ui, "install") {
                     self.start_worker(setup::run_install);
                 }
             });
@@ -224,8 +224,7 @@ impl eframe::App for App {
         ui.add_space(10.0);
 
         if let Some(e) = &self.error {
-            let text = e.clone();
-            ui.colored_label(theme::ERROR_TEXT, text);
+            ui.colored_label(theme::ERROR_TEXT, e);
             ui.add_space(8.0);
         }
 

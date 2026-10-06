@@ -1,5 +1,5 @@
 use crate::download;
-use crate::gui::WorkerMsg;
+use crate::gui::{log, WorkerMsg};
 use crate::paths;
 use std::io::BufRead;
 use std::os::unix::fs::PermissionsExt;
@@ -9,10 +9,6 @@ use std::sync::mpsc::Sender;
 const WINETRICKS_URL: &str =
     "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks";
 const WINETRICKS_PACKAGES: [&str; 5] = ["dxvk", "vkd3d", "corefonts", "vcrun2022", "win10"];
-
-fn log(tx: &Sender<WorkerMsg>, text: &str) {
-    let _ = tx.send(WorkerMsg::Log(text.to_string()));
-}
 
 // path with our wine and the tools bundled inside the appimage
 fn full_path_var() -> String {
@@ -32,7 +28,7 @@ pub fn add_wine_env(cmd: &mut Command) {
     cmd.env("WINEDLLOVERRIDES", "winemenubuilder.exe=d");
 }
 
-pub fn run_logged_command(mut cmd: Command, tx: &Sender<WorkerMsg>) -> Result<(), String> {
+fn run_logged_command(mut cmd: Command, tx: &Sender<WorkerMsg>) -> Result<(), String> {
     cmd.stdout(Stdio::piped());
     cmd.stderr(Stdio::piped());
 
@@ -118,8 +114,7 @@ fn setup_prefix(tx: &Sender<WorkerMsg>) -> Result<(), String> {
     cmd.arg("-f");
     cmd.args(WINETRICKS_PACKAGES);
     add_wine_env(&mut cmd);
-    run_logged_command(cmd, tx)?;
-    Ok(())
+    run_logged_command(cmd, tx)
 }
 
 fn check_host_tools() -> Result<(), String> {
@@ -136,7 +131,6 @@ fn check_host_tools() -> Result<(), String> {
     Ok(())
 }
 
-// the whole install, runs in a worker thread
 pub fn run_install(tx: &Sender<WorkerMsg>) -> Result<(), String> {
     std::fs::create_dir_all(paths::data_dir())
         .map_err(|e| format!("could not create data folder: {}", e))?;

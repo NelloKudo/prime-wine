@@ -8,8 +8,12 @@ fn home() -> PathBuf {
     PathBuf::from(home)
 }
 
+fn share_dir() -> PathBuf {
+    home().join(".local/share")
+}
+
 pub fn data_dir() -> PathBuf {
-    home().join(".local/share/prime-wine")
+    share_dir().join("prime-wine")
 }
 
 pub fn wine_dir() -> PathBuf {
@@ -42,19 +46,19 @@ pub fn brave_exe() -> PathBuf {
 }
 
 pub fn desktop_file() -> PathBuf {
-    home().join(".local/share/applications/prime-wine.desktop")
+    share_dir().join("applications/prime-wine.desktop")
 }
 
 pub fn manage_desktop_file() -> PathBuf {
-    home().join(".local/share/applications/prime-wine-manage.desktop")
+    share_dir().join("applications/prime-wine-manage.desktop")
 }
 
 pub fn icon_file() -> PathBuf {
-    home().join(".local/share/icons/hicolor/256x256/apps/prime-wine.png")
+    share_dir().join("icons/hicolor/256x256/apps/prime-wine.png")
 }
 
 pub fn manage_icon_file() -> PathBuf {
-    home().join(".local/share/icons/hicolor/256x256/apps/prime-wine-manage.png")
+    share_dir().join("icons/hicolor/256x256/apps/prime-wine-manage.png")
 }
 
 pub fn is_installed() -> bool {

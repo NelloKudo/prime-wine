@@ -78,7 +78,6 @@ fn set_text_styles(style: &mut egui::Style) {
         .insert(egui::TextStyle::Monospace, egui::FontId::monospace(12.0));
 }
 
-// every widget state looks the same, only the colors change
 fn paint_state(
     state: &mut egui::style::WidgetVisuals,
     fill: egui::Color32,

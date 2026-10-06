@@ -1,5 +1,5 @@
 use crate::download;
-use crate::gui::WorkerMsg;
+use crate::gui::{log, WorkerMsg};
 use crate::paths;
 use crate::setup;
 use std::process::Command;
@@ -9,10 +9,6 @@ use std::sync::mpsc::Sender;
 const BRAVE_INSTALLER_URL: &str = "https://github.com/brave/brave-browser/releases/download/v1.92.139/BraveBrowserStandaloneSetup.exe";
 const BRAVE_INSTALLER_NAME: &str = "BraveBrowserStandaloneSetup.exe";
 const BRAVE_RELEASES_API: &str = "https://api.github.com/repos/brave/brave-browser/releases/latest";
-
-fn log(tx: &Sender<WorkerMsg>, text: &str) {
-    let _ = tx.send(WorkerMsg::Log(text.to_string()));
-}
 
 fn installer_path() -> std::path::PathBuf {
     paths::data_dir().join(BRAVE_INSTALLER_NAME)
@@ -26,12 +22,8 @@ fn run_installer(tx: &Sender<WorkerMsg>) -> Result<(), String> {
     // no pipes here, the installer hands them to helpers that never exit
     cmd.stdout(std::process::Stdio::null());
     cmd.stderr(std::process::Stdio::null());
-    let mut child = cmd
-        .spawn()
+    cmd.status()
         .map_err(|e| format!("could not start the installer: {}", e))?;
-
-    log(tx, "waiting for the installer to finish...");
-    let _ = child.wait();
 
     for _ in 0..60 {
         if paths::brave_exe().exists() {
@@ -70,16 +62,14 @@ fn latest_installer_url() -> Result<String, String> {
         .into_json()
         .map_err(|e| format!("bad answer from github: {}", e))?;
 
-    let empty = Vec::new();
-    let assets = json["assets"].as_array().unwrap_or(&empty);
-    for asset in assets {
-        let name = asset["name"].as_str().unwrap_or("");
-        if name == BRAVE_INSTALLER_NAME {
-            let url = asset["browser_download_url"].as_str().unwrap_or("");
-            return Ok(url.to_string());
-        }
-    }
-    Err("could not find the brave installer in the latest release".to_string())
+    json["assets"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .find(|asset| asset["name"] == BRAVE_INSTALLER_NAME)
+        .and_then(|asset| asset["browser_download_url"].as_str())
+        .map(str::to_string)
+        .ok_or_else(|| "could not find the brave installer in the latest release".to_string())
 }
 
 // brave cannot update itself under wine so we redo the install with the newest one

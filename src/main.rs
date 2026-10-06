@@ -10,14 +10,18 @@ mod theme;
 fn main() {
     let is_manage = std::env::args().any(|a| a == "--manage");
 
-    // first run or explicit request opens the manager window
-    if is_manage || !paths::is_installed() {
-        gui::run_gui(None);
-        return;
-    }
-
-    // normal click goes straight to prime video
-    if let Err(e) = launcher::launch_prime_and_wait() {
-        gui::run_gui(Some(e));
+    let mut show_gui = is_manage || !paths::is_installed();
+    let mut error = None;
+    loop {
+        if show_gui && !gui::run_gui(error.take()) {
+            return;
+        }
+        match launcher::launch_prime() {
+            Ok(()) => return,
+            Err(e) => {
+                error = Some(e);
+                show_gui = true;
+            }
+        }
     }
 }
