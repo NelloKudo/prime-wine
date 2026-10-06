@@ -72,6 +72,16 @@ Some more interesting points:
 
 ---
 
+## to-do:
+
+- Actually rewrite this in a decent way (this was put together in a few days on the train)
+  - Current packaging makes like zero sense, I swear I'll do better when I get to it.
+  - winetricks for the few things we're installing in the prefix is overkill, should get rid of cabextract dep too..
+- Upstream the stuff Brave would actually need to work out of the box and update correctly
+  - Hopefully this will only take a few stubs...
+
+---
+
 ## Building from source
 
 Everything is just plain Rust plus a bash script for packaging:
