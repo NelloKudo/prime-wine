@@ -1,7 +1,7 @@
 use crate::{brave, desktop, launcher, paths, setup, theme};
+use eframe::egui;
 use std::cell::Cell;
 use std::rc::Rc;
-use eframe::egui;
 use std::sync::mpsc::{Receiver, Sender};
 
 pub enum WorkerMsg {

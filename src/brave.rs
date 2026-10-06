@@ -1,5 +1,5 @@
 use crate::download;
-use crate::gui::{log, WorkerMsg};
+use crate::gui::{WorkerMsg, log};
 use crate::paths;
 use crate::setup;
 use std::process::Command;
