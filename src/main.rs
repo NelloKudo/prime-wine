@@ -1,5 +1,4 @@
 mod brave;
-mod desktop;
 mod download;
 mod gui;
 mod launcher;

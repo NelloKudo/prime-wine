@@ -24,13 +24,12 @@ chmod +x PrimeWine-x86_64.AppImage
 ./PrimeWine-x86_64.AppImage
 ```
 
-Press `install` and let it do its thing: it downloads Wine and Brave, sets up the prefix with everything needed and adds a **Prime Video** entry to your app menu. After logging in to Prime, accept the Widevine DRM notification you get in the website, wait for the site to reboot, then relaunch Prime Video. Enjoy HD!
+Press `install` and let it do its thing: it downloads Wine and Brave and sets up the prefix with everything needed. After logging in to Prime, accept the Widevine DRM notification you get in the website, wait for the site to reboot, then relaunch Prime Video. Enjoy HD!
 
 From then on:
-- Clicking the menu entry (or the AppImage) goes straight to Prime Video.
-- Search for **Manage Prime Video settings** in the menu (or run the AppImage with `--manage`) to update Brave, kill Wine, reinstall or uninstall.
+- Running the AppImage goes straight to Prime Video.
+- Run the AppImage with `--manage` to update Brave, kill Wine, reinstall or uninstall.
 - Brave cannot update itself under Wine, so use the `update brave` button every now and then.
-- Keep the AppImage where it was when you installed: the menu entries point at that exact path.
 
 The only things needed on your system are `bash`, `tar` and `xz`, which every distro ships anyway (`cabextract` comes bundled in the AppImage).
 

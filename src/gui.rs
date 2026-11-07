@@ -1,4 +1,4 @@
-use crate::{brave, desktop, launcher, paths, setup, theme};
+use crate::{brave, launcher, paths, setup, theme};
 use eframe::egui;
 use std::cell::Cell;
 use std::rc::Rc;
@@ -136,7 +136,6 @@ impl App {
 
     fn uninstall(&mut self) {
         let _ = std::fs::remove_dir_all(paths::data_dir());
-        desktop::remove_desktop_entry();
         self.log_lines.push("everything removed".to_string());
         self.confirm_uninstall = false;
     }

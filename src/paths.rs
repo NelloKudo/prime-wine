@@ -45,22 +45,6 @@ pub fn brave_exe() -> PathBuf {
     prefix_dir().join("drive_c/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe")
 }
 
-pub fn desktop_file() -> PathBuf {
-    share_dir().join("applications/prime-wine.desktop")
-}
-
-pub fn manage_desktop_file() -> PathBuf {
-    share_dir().join("applications/prime-wine-manage.desktop")
-}
-
-pub fn icon_file() -> PathBuf {
-    share_dir().join("icons/hicolor/256x256/apps/prime-wine.png")
-}
-
-pub fn manage_icon_file() -> PathBuf {
-    share_dir().join("icons/hicolor/256x256/apps/prime-wine-manage.png")
-}
-
 pub fn is_installed() -> bool {
     wine_bin().exists() && brave_exe().exists()
 }

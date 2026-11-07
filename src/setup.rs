@@ -140,7 +140,6 @@ pub fn run_install(tx: &Sender<WorkerMsg>) -> Result<(), String> {
     download_winetricks(tx)?;
     setup_prefix(tx)?;
     crate::brave::install_brave(tx)?;
-    crate::desktop::install_desktop_entry()?;
 
     log(tx, "all done!");
     Ok(())
