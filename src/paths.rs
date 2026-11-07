@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 // at some point i'll automate getting new versions, wanna stay safe from regressions for now
-pub const WINE_VERSION: &str = "11.13";
+pub const WINE_VERSION: &str = "11.21";
 
 fn home() -> PathBuf {
     let home = std::env::var("HOME").expect("HOME is not set");

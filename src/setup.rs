@@ -96,6 +96,25 @@ fn download_and_extract_wine(tx: &Sender<WorkerMsg>) -> Result<(), String> {
     Ok(())
 }
 
+fn cleanup_wine(tx: &Sender<WorkerMsg>) {
+    let Ok(entries) = std::fs::read_dir(paths::data_dir()) else {
+        return;
+    };
+
+    let current = paths::wine_dir();
+    for entry in entries.flatten() {
+        let path = entry.path();
+        let is_wine = entry.file_name().to_string_lossy().starts_with("wine-");
+        if is_wine && path.is_dir() && path != current {
+            log(
+                tx,
+                &format!("removing old {}", entry.file_name().to_string_lossy()),
+            );
+            let _ = std::fs::remove_dir_all(&path);
+        }
+    }
+}
+
 fn download_winetricks(tx: &Sender<WorkerMsg>) -> Result<(), String> {
     log(tx, "downloading winetricks...");
     download::download_file(WINETRICKS_URL, &paths::winetricks_bin(), tx)?;
@@ -137,6 +156,7 @@ pub fn run_install(tx: &Sender<WorkerMsg>) -> Result<(), String> {
 
     check_host_tools()?;
     download_and_extract_wine(tx)?;
+    cleanup_wine(tx);
     download_winetricks(tx)?;
     setup_prefix(tx)?;
     crate::brave::install_brave(tx)?;
