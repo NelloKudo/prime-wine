@@ -18,7 +18,10 @@ pub fn log(tx: &Sender<WorkerMsg>, text: &str) {
 // returns true if the user clicked play
 pub fn run_gui(startup_error: Option<String>) -> bool {
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default().with_inner_size([640.0, 500.0]),
+        viewport: egui::ViewportBuilder::default()
+            .with_inner_size([640.0, 500.0])
+            // empty icon so eframe does not fall back to the egui logo
+            .with_icon(egui::IconData::default()),
         ..Default::default()
     };
     let play = Rc::new(Cell::new(false));
@@ -27,7 +30,6 @@ pub fn run_gui(startup_error: Option<String>) -> bool {
         "prime-wine",
         options,
         Box::new(|cc| {
-            egui_extras::install_image_loaders(&cc.egui_ctx);
             theme::apply(&cc.egui_ctx);
             Ok(Box::new(App::new(startup_error, app_play)))
         }),
@@ -199,24 +201,11 @@ impl eframe::App for App {
                 .request_repaint_after(std::time::Duration::from_millis(100));
         }
 
-        let icon_size = 48.0;
-        let icon_rect = egui::Rect::from_min_size(
-            egui::pos2(
-                ui.max_rect().right() - icon_size - 14.0,
-                ui.max_rect().top() + 14.0,
-            ),
-            egui::vec2(icon_size, icon_size),
-        );
-        ui.put(
-            icon_rect,
-            egui::Image::new(egui::include_image!("../assets/icon.png")),
-        );
-
         ui.add_space(4.0);
         ui.vertical_centered(|ui| {
             ui.heading("prime-wine");
             ui.label(
-                egui::RichText::new("watch prime video in hd with brave and wine")
+                egui::RichText::new("wine wrapper to run prime-video in brave, for hd playback")
                     .color(theme::DIM_TEXT),
             );
         });
